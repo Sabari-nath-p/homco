@@ -21,7 +21,8 @@ Widget dropDown(TextEditingController productSearch, List products) =>
           )
           .toList(),
       searchStyle: tbox(FontWeight: FontWeight.w400),
-      searchInputDecoration: InputDecoration(border: InputBorder.none),
+      searchInputDecoration:
+          InputDecoration(border: InputBorder.none, isDense: true),
       onSubmit: (p0) {
         for (String prd in products) {
           if (prd.toUpperCase().contains(p0.toUpperCase())) {
