@@ -98,7 +98,8 @@ class _ingredientListState extends State<ingredientList> {
   }
 
   addRow(index) {
-  
+    print("ingredient length");
+    print(parameter.pmode.ingredient);
     return DataRow(
       cells: [
         DataCell(Container(
@@ -106,7 +107,7 @@ class _ingredientListState extends State<ingredientList> {
             height: double.infinity,
             padding: EdgeInsets.only(left: 4),
             alignment: Alignment.center,
-            child: Text("$index"))),
+            child: Text("${index + 1}"))),
         DataCell(Container(
             width: double.infinity,
             height: double.infinity,
@@ -118,7 +119,7 @@ class _ingredientListState extends State<ingredientList> {
             height: double.infinity,
             padding: EdgeInsets.only(left: 4),
             alignment: Alignment.center,
-            child: Text("${(parameter.pmode.ingredientQty[index] * 100)} %"))),
+            child: Text("${(parameter.pmode.ingredientQty[index])} %"))),
         DataCell(Container(
             width: double.infinity,
             height: double.infinity,

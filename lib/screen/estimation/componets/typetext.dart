@@ -7,7 +7,7 @@ topText(String name) => Container(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            "MOTHERTINCHER ",
+            "$name ",
             style: TextStyle(
                 fontSize: 40,
                 fontFamily: "Monsterrat",

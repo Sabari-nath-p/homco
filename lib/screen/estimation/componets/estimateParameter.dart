@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:homco/model/productsModel.dart';
+import 'package:homco/model/rawMaterial.dart';
 import 'package:homco/screen/estimation/DataModel/commonModel.dart';
 import 'package:homco/screen/estimation/DataModel/priceModel.dart';
 import 'package:homco/screen/estimation/estimationPage.dart';
@@ -151,57 +154,33 @@ estimateparater(parameterConnector parameter) => Column(
                     ))),
             Expanded(child: Container()),
             InkWell(
-              onTap: () {
-                int index =
-                    parameter.products.indexOf(parameter.productText.text) + 4;
-
+              onTap: () async {
                 parameter.pmode.ingredient.clear();
                 parameter.pmode.ingredientQty.clear();
                 parameter.pmode.ingredientPrice.clear();
                 parameter.pmode.ingredientSub.clear();
-                var Sheet = parameter.excel!["Ingredient List - Mother Tinctu"];
-                var cell = Sheet.cell(db.CellIndex.indexByString("E${index}"));
+                parameter.pmode.PriceTotal = 0;
+                var db = await Hive.openBox("PRODUCTING");
+                var rm = await Hive.openBox("RAWMATERIAL");
+                String key = parameter.productText.text.toUpperCase();
+                double qty = double.parse(parameter.qtyText.text.trim());
+                print(parameter.productText.text);
+                List ing = db.get(key);
 
-                parameter.pmode.ingredient.add(cell.value.toString());
-                cell = Sheet.cell(db.CellIndex.indexByString("F${index}"));
-                parameter.pmode.ingredient.add(cell.value.toString());
-                cell = Sheet.cell(db.CellIndex.indexByString("G${index}"));
-                parameter.pmode.ingredient.add(cell.value.toString());
-
-                cell = Sheet.cell(db.CellIndex.indexByString("K${index}"));
-
-                double qty = double.parse(cell.value.toString());
-
-                parameter.pmode.ingredientQty.add(qty);
-                cell = Sheet.cell(db.CellIndex.indexByString("L${index}"));
-                qty = double.parse(cell.value.toString());
-
-                parameter.pmode.ingredientQty.add(qty);
-                cell = Sheet.cell(db.CellIndex.indexByString("M${index}"));
-                qty = double.parse(cell.value.toString());
-
-                parameter.pmode.ingredientQty.add(qty);
-
-                for (var ing in parameter.pmode.ingredient) {
-                  for (ingredientModel price in parameter.itemPrice) {
-                    if (price.Name.contains(ing)) {
-                      parameter.pmode.ingredientPrice.add(price.Price);
-                    }
-                  }
+                for (IngredientsList ingredient in ing) {
+                  double ingqty = (qty * ingredient.quantity!) / 100;
+                  print(ingredient.content);
+                  print(ingqty);
+                  parameter.pmode.ingredient.add(ingredient.content);
+                  parameter.pmode.ingredientQty.add(ingredient.quantity);
+                  String tempkey = ingredient.content!.toUpperCase();
+                  RawMaterialModel rmm = rm.get(tempkey);
+                  parameter.pmode.ingredientPrice.add(rmm.price);
+                  parameter.pmode.ingredientSub.add(ingqty * rmm.price!);
+                  parameter.pmode.PriceTotal =
+                      parameter.pmode.PriceTotal + (ingqty * rmm.price!);
+                  parameter.updater!.value++;
                 }
-                double? tempTotal = 0;
-                int i = 0;
-                for (var ing in parameter.pmode.ingredientPrice) {
-                  double tempQty = parameter.pmode.ingredientQty[i] *
-                      double.parse(parameter.qtyText.text.toString())
-                          .toDouble();
-                  print(tempQty);
-                  tempTotal = tempTotal! + (tempQty * ing) as double;
-                  parameter.pmode.ingredientSub.add(tempQty * ing);
-                  i++;
-                }
-                parameter.pmode.PriceTotal = tempTotal!;
-                parameter.updater?.value++;
               },
               child: Container(
                 decoration: buttonDecoration(),
@@ -220,7 +199,6 @@ estimateparater(parameterConnector parameter) => Column(
 class parameterConnector {
   List products = [];
   List packtype = [];
-  List itemPrice = [];
   TextEditingController productText = TextEditingController();
   TextEditingController qtyText = TextEditingController();
   TextEditingController packText = TextEditingController();
@@ -229,5 +207,6 @@ class parameterConnector {
   TextEditingController energycost = TextEditingController();
   priceModel pmode = priceModel();
   ValueNotifier? updater;
-  db.Excel? excel;
+  String category = "";
+  double finalCost = 0;
 }

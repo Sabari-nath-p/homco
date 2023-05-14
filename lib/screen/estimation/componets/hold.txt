@@ -1,0 +1,56 @@
+  int index =
+                    parameter.products.indexOf(parameter.productText.text) + 4;
+
+                parameter.pmode.ingredient.clear();
+                parameter.pmode.ingredientQty.clear();
+                parameter.pmode.ingredientPrice.clear();
+                parameter.pmode.ingredientSub.clear();
+                var Sheet = parameter.excel!["Ingredient List - Mother Tinctu"];
+                var cell = Sheet.cell(db.CellIndex.indexByString("E${index}"));
+                double qty = 0;
+                ;
+                if (cell != "")
+                  parameter.pmode.ingredient.add(cell.value.toString());
+                cell = Sheet.cell(db.CellIndex.indexByString("F${index}"));
+                if (cell != "")
+                  parameter.pmode.ingredient.add(cell.value.toString());
+                cell = Sheet.cell(db.CellIndex.indexByString("G${index}"));
+                if (cell != "")
+                  parameter.pmode.ingredient.add(cell.value.toString());
+
+                cell = Sheet.cell(db.CellIndex.indexByString("K${index}"));
+                print("cell value");
+                print(cell.value);
+
+                qty = double.parse(cell.value.toString());
+
+                parameter.pmode.ingredientQty.add(qty);
+                cell = Sheet.cell(db.CellIndex.indexByString("L${index}"));
+                qty = double.parse(cell.value.toString());
+
+                parameter.pmode.ingredientQty.add(qty);
+                cell = Sheet.cell(db.CellIndex.indexByString("M${index}"));
+                qty = double.parse(cell.value.toString());
+
+                parameter.pmode.ingredientQty.add(qty);
+
+                for (var ing in parameter.pmode.ingredient) {
+                  for (ingredientModel price in parameter.itemPrice) {
+                    if (price.Name.contains(ing)) {
+                      parameter.pmode.ingredientPrice.add(price.Price);
+                    }
+                  }
+                }
+                double? tempTotal = 0;
+                int i = 0;
+                for (var ing in parameter.pmode.ingredientPrice) {
+                  double tempQty = parameter.pmode.ingredientQty[i] *
+                      double.parse(parameter.qtyText.text.toString())
+                          .toDouble();
+                  print(tempQty);
+                  tempTotal = tempTotal! + (tempQty * ing) as double;
+                  parameter.pmode.ingredientSub.add(tempQty * ing);
+                  i++;
+                }
+                parameter.pmode.PriceTotal = tempTotal!;
+                parameter.updater?.value++;

@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show ByteData, rootBundle;
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:homco/Color.dart';
 import 'package:homco/common/bdecoration.dart';
 import 'package:homco/common/size.dart';
+import 'package:homco/model/packingMaterilModel.dart';
 import 'package:homco/screen/estimation/DataModel/commonModel.dart';
 import 'package:homco/screen/estimation/DataModel/priceModel.dart';
-import 'package:homco/screen/estimation/componets/billComponents.dart';
+import 'package:homco/screen/estimation/componets/bill.dart';
 import 'package:homco/screen/estimation/componets/estimateParameter.dart';
 import 'package:homco/screen/estimation/componets/ingredientList.dart';
 import 'package:homco/screen/estimation/componets/typetext.dart';
-import 'package:searchfield/searchfield.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:homco/screen/estimation/textstyle.dart';
 import 'package:excel/excel.dart' as db;
 
 import '../../common/simpleGenerator.dart';
-import 'componets/dropDown.dart';
+import '../../model/productsModel.dart';
 
 class estimationPage extends StatefulWidget {
-  const estimationPage({super.key});
+  String value;
+  estimationPage({super.key, required this.value});
 
   @override
   State<estimationPage> createState() => _estimationPageState();
@@ -28,47 +27,39 @@ class estimationPage extends StatefulWidget {
 
 class _estimationPageState extends State<estimationPage> {
   loadData() async {
-    ByteData data = await rootBundle.load('assets/complete file.xlsm');
-    var bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    loadProducts();
+    loadPackMaterial();
+    Evalue.updater = updater;
+    Evalue.category = widget.value;
+  }
 
-    db.Excel excel = db.Excel.decodeBytes(bytes);
-    Evalue.excel = excel;
-    db.Sheet sheetObject = excel['Ingredient List - Mother Tinctu'];
-    db.Sheet packingMaterial = excel['Packing Material - Cost'];
-    db.Sheet ingredient = excel['RM Price list'];
+  loadProducts() async {
+    var db = await Hive.openBox("PRODUCT");
+    var db2 = await Hive.openBox("PRODUCTING");
+
     setState(() {
-      for (int i = 4; i < 1167; i++) {
-        var cell = sheetObject.cell(db.CellIndex.indexByString("C$i"));
-        if (i < 10) {
-          var pcell =
-              packingMaterial.cell(db.CellIndex.indexByString("A${i - 1}"));
-          Evalue.packtype.add(pcell.value.toString());
-        }
+      for (var ky in db.keys) {
+        print(ky);
+        productModel pd = db.get(ky);
+        List ing = db2.get(ky);
+        pd.ingredientsList = ing.cast<IngredientsList>();
+        //   print(db2.get(ky));
+        // print(pd.toJson());
+        print(widget.value);
+        print(pd.toJson());
+        if (widget.value.trim().toUpperCase() ==
+            pd.productCategory!.trim().toUpperCase())
+          products.add(pd.productName);
+      }
+      Evalue.products = products;
+    });
+  }
 
-        if (i < 318) {
-          //ingredeint name
-          var ingName = ingredient.cell(db.CellIndex.indexByString("B$i"));
-          //ingredeint price
-          var ingPrice = ingredient.cell(db.CellIndex.indexByString("C$i"));
-
-          ingredientModel ingModel = new ingredientModel();
-          try {
-            if (ingPrice.value.toString() != "" ||
-                ingPrice.value.toString() != "nil" ||
-                ingPrice.value.toString().length > 10) {
-              ingModel.Name = ingName.value.toString();
-              ingModel.Price = int.parse(ingPrice.value.toString()).toInt();
-              Evalue.itemPrice.add(ingModel);
-            }
-          } catch (e) {
-            print(e);
-          }
-        }
-        if (cell.value.toString() == "Mother Tincture") {
-          var prdName = sheetObject.cell(db.CellIndex.indexByString("D$i"));
-
-          Evalue.products.add(prdName.value.toString());
-        }
+  loadPackMaterial() async {
+    var db = await Hive.openBox("PACKINGMATERIAL");
+    setState(() {
+      for (packingmaterialModel pk in db.values) {
+        Evalue.packtype.add(pk.packName);
       }
     });
   }
@@ -104,7 +95,28 @@ class _estimationPageState extends State<estimationPage> {
       backgroundColor: Color(0xffE6EDC5),
       body: Stack(
         children: [
-          Positioned(top: 30, left: 63, child: topText("MOTHERTINCHER")),
+          Positioned(
+              top: 30,
+              right: 20,
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  child: Text(
+                    "exit",
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white),
+                  ),
+                  decoration: BoxDecoration(
+                      color: appLightGreen.withOpacity(.8),
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              )),
+          Positioned(top: 30, left: 63, child: topText("${widget.value}")),
           Positioned(
               top: 100,
               left: 60,
@@ -171,57 +183,49 @@ class _estimationPageState extends State<estimationPage> {
                                         isDense: true,
                                       )))
                             ]),
+                      ),
+                    if (Evalue.finalCost != 0)
+                      Container(
+                        margin: EdgeInsets.only(right: 30, top: 10),
+                        alignment: Alignment.centerRight,
+                        width: double.infinity,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                "Final Cost / Pack   : ",
+                                style: tbox(),
+                              ),
+                              Container(
+                                  width: 120,
+                                  height: 40,
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.symmetric(horizontal: 5),
+                                  decoration: tboxdecoration(),
+                                  child: TextField(
+                                      controller: TextcontrollerGenerator(
+                                          " ${Evalue.finalCost.toString()}/-"),
+                                      textAlign: TextAlign.center,
+                                      enabled: false,
+                                      style: tbox(),
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        isDense: true,
+                                      )))
+                            ]),
                       )
                   ],
                 ),
               )),
-          Positioned(
-              left: 800,
-              right: 150,
-              top: 100,
-              bottom: 40,
-              child: Container(
-                decoration: tboxdecoration(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    height(15),
-                    Container(
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      child: Text(
-                        "THE KERALA STATE HOMOEOPATHIC \nCO-OPERATIVE PHARMACY LTD.",
-                        textAlign: TextAlign.center,
-                        style: tbox(FontWeight: FontWeight.w400),
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      child: Text(
-                        "Costing Sheet ${Evalue.productText.text}",
-                        textAlign: TextAlign.center,
-                        style: tbox(),
-                      ),
-                    ),
-                    billtotalItem("Total Material Cost", "12300/-", top: 20),
-                    billItem("No. of Packs", "2300/-", top: 20),
-                    billItem("Packing Cost/ Pack", "2.4/-"),
-                    billtotalItem("Packing Expences / Batch", "5300/-"),
-                    billtotalItem("Direct Labour Cost", "23400/-", top: 20),
-                    billtotalItem("Energy Cost / Batch", "5300/-", top: 20),
-                    billtotalItem("Prime Cost / Batch", "24500/-"),
-                    billItem("Factory Overhead", "2340/-", top: 20),
-                    billtotalItem("Factory overHead / Batch", "24500/-"),
-                    billItem("Administrative Overheads", "2340/-", top: 20),
-                    billtotalItem("Cost of Production / Batch", "24500/-"),
-                    billItem("Selling & Distribution Overheads", "2340/-",
-                        top: 20),
-                    billtotalItem("Cost of Sales per Batch", "24500/-"),
-                    billtotalItem("Cost / Pack", "8/-"),
-                  ],
-                ),
-              ))
+          if (Evalue.pmode.ingredient.isNotEmpty)
+            Positioned(
+                left: 800,
+                right: 150,
+                top: 100,
+                bottom: 40,
+                child: bill(
+                  Evalue: Evalue,
+                ))
         ],
       ),
     );

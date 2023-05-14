@@ -1,76 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:homco/Color.dart';
+import 'package:homco/screen/admin/admin.dart';
 
-loginDetails() => Container(
-      padding: EdgeInsets.all(25),
-      decoration: BoxDecoration(
+loginDetails(BuildContext context) => InkWell(
+      onTap: () {
+        // Navigator.of(context)
+        //  .push(MaterialPageRoute(builder: (context) => adminScreen()));
+      },
+      child: Container(
+        padding: EdgeInsets.all(25),
+        decoration: BoxDecoration(
           color: Colors.white10,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.blue, width: 1.8)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "H O M C O",
-            style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: Colors.black54),
-          ),
-          SizedBox(
-            width: 320,
-            child: Text(
-              "THE KERALA STATE HOMOEOPATHIC CO-OPERATIVE PHARMACY LTD",
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Admin Login",
               style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: Colors.black54),
             ),
-          ),
-          Text(
-            "Admin Login",
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Colors.black54),
-          ),
-          Container(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.blue, width: 1.5)),
-            width: 320,
-            margin: EdgeInsets.symmetric(vertical: 10),
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: TextField(
-              decoration: InputDecoration(
-                  border: InputBorder.none, hintText: "User Id"),
+            Container(
+              width: 320,
+              margin: EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: TextField(
+                decoration:
+                    InputDecoration(hintText: "User Id", labelText: "User ID"),
+              ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.blue, width: 1.5)),
-            width: 320,
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: TextField(
-              decoration: InputDecoration(
-                  border: InputBorder.none, hintText: "Password"),
+            Container(
+              width: 320,
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: TextField(
+                decoration: InputDecoration(
+                    hintText: "Password", labelText: "Password"),
+              ),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.all(8),
-            margin: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-            width: 180,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-                color: Colors.blue, borderRadius: BorderRadius.circular(24)),
-            child: Text(
-              "Submit",
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white),
-            ),
-          )
-        ],
+            InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => adminScreen()));
+              },
+              child: Container(
+                padding: EdgeInsets.all(8),
+                //margin: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+                margin: EdgeInsets.only(left: 10, top: 10),
+                width: 300,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                    color: appLightGreen.withOpacity(.6),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Text(
+                  "Submit",
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white),
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );

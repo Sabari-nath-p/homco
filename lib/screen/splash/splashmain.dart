@@ -5,6 +5,17 @@ import 'package:homco/screen/estimation/estimationPage.dart';
 import 'package:homco/screen/splash/itemCard.dart';
 import 'package:homco/screen/splash/loginDetails.dart';
 
+List Categories = [
+  "Mother Tincture",
+  "Oil",
+  "Oinment",
+  "Syrup",
+  "Dilution",
+  "Tituration",
+  "Bio Chemic",
+  "Globule"
+];
+
 class splashMain extends StatefulWidget {
   const splashMain({super.key});
 
@@ -15,39 +26,68 @@ class splashMain extends StatefulWidget {
 class _splashMainState extends State<splashMain> {
   @override
   Widget build(BuildContext context) {
+    double ratio =
+        MediaQuery.of(context).size.width / MediaQuery.of(context).size.width;
+    print(MediaQuery.of(context).size.width);
     return Scaffold(
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         child: Stack(
           children: [
-            Positioned(left: 60, top: 60, child: loginDetails()),
             Positioned(
-                right: 60,
-                top: 60,
-                left: 550,
-                child: Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: Image.asset(
+                  "assets/image/splash_main.png",
+                  fit: BoxFit.fill,
+                )),
+            Positioned(
+                left: 110,
+                top: 350,
+                child: Column(
                   children: [
-                    for (int i = 0; i < 7; i++)
+                    for (var v in Categories)
                       InkWell(
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: ((context) => estimationPage())));
-                          },
-                          child: item())
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => estimationPage(value: v)));
+                        },
+                        child: Container(
+                          width: 250,
+                          height: 35,
+                          margin: EdgeInsets.only(top: 5, bottom: 5),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.white),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                  width: 35,
+                                  height: 35,
+                                  child:
+                                      Image.asset("assets/image/medicine.png")),
+                              Text(
+                                v,
+                                style: TextStyle(
+                                    fontFamily: "Montserrat",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black.withOpacity(.7)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                   ],
                 )),
             Positioned(
-                bottom: 20,
-                left: 20,
-                right: 20,
-                height: 200,
-                child: Image.network(
-                  'https://homcokerala.com/imgs/homco-logo.jpg',
-                  fit: BoxFit.fill,
-                ))
+              right: 125,
+              top: 300,
+              child: loginDetails(context),
+            )
           ],
         ),
       ),
